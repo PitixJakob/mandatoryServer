@@ -40,7 +40,7 @@ public class User implements Runnable {
 
     public String getUser() {
         String result = "User not found";
-        if (user != null){
+        if (user != null) {
             result = user;
         }
         return result;
@@ -70,48 +70,54 @@ public class User implements Runnable {
     public void run() {
         String message;
 
-        try{
-            while ((message = fromUser.readLine()) != null){
-                if (message.startsWith("JOIN")){
+        try {
+            while ((message = fromUser.readLine()) != null) {
+                if (message.startsWith("JOIN")) {
                     createUser(message.substring(5));
                 }
-                if (message.startsWith("DATA")){
+                if (message.startsWith("DATA")) {
                     sendMessage(message.substring(5));
                 }
-                if (message.startsWith("ALVE")){
+                if (message.startsWith("ALVE")) {
                     stillAlive();
                 }
-                if (message.startsWith("QUIT")){
+                if (message.startsWith("QUIT")) {
                     disconnect();
                 }
 
 
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
 
         }
     }
 
-    public void createUser(String message){
+    public void createUser(String message) {
         String[] data = message.split(",");
         setUser(data[0]);
-        server.addUser(this);
         timer.start();
+        if (!server.addUser(this)) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public void sendMessage(String message){
+    public void sendMessage(String message) {
         server.broadcast(message);
     }
 
-    public void getMessage(String message){
+    public void getMessage(String message) {
         pw.println(message);
     }
 
-    public void stillAlive(){
+    public void stillAlive() {
         timer.restart();
     }
 
-    public void disconnect(){
+    public void disconnect() {
         server.removeUser(this);
         timer.stop();
         try {

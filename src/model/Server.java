@@ -5,19 +5,16 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Timer;
 
 /**
  * Created by jakob on 07-09-16.
  */
 public class Server implements Runnable {
     private ArrayList<User> users;
-    private ArrayList<String> messageList;
     private ServerSocket serverSocket;
 
     public Server() throws IOException {
         users = new ArrayList<>();
-        messageList = new ArrayList<>();
     }
 
 
@@ -42,7 +39,6 @@ public class Server implements Runnable {
     }
 
     public void broadcast(String message) {
-        messageList.add(message);
         System.out.println(message);
 
         for (User user : users) {
@@ -50,31 +46,47 @@ public class Server implements Runnable {
         }
     }
 
-    public void addUser(User user){
+    public boolean addUser(User user){
         boolean result = true;
 
         for (User listUser : users) {
-            if (user.getUser().equals(user.getUser())){
+            if (user.getUser().equals(listUser.getUser())){
                 result = false;
-                System.out.println("User already exists");
             }
         }
         if (result){
             users.add(user);
             broadcast("User: "+user.getUser()+" joined the chat");
             user.getMessage("J_OK");
+            updateList();
+            return true;
         }else{
             user.getMessage("J_ERR");
+            return false;
         }
     }
 
     public void removeUser(User user){
+        User userToBeRemoved = null;
         for (User listUser : users) {
             if (listUser.getUser().equals(user.getUser())){
-                users.remove(listUser);
-                broadcast("SERVER: User "+user.getUser()+" disconnected");
+                userToBeRemoved = listUser;
             }
         }
+        if (userToBeRemoved != null){
+            broadcast("User: "+userToBeRemoved.getUser()+" disconnected");
+            users.remove(userToBeRemoved);
+            updateList();
+        }
+    }
+
+    public void updateList(){
+        String list = "LIST";
+        for (User user : users) {
+            list += " "+user.getUser();
+        }
+
+        broadcast(list);
     }
 
 }
