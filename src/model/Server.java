@@ -10,34 +10,28 @@ import java.util.Timer;
 /**
  * Created by jakob on 07-09-16.
  */
-public class Server implements Runnable{
-    private ArrayList<User> userList;
-    private ArrayList<Message> messageList;
-    private ArrayList<Socket> socketList;
-    private Timer timer;
+public class Server implements Runnable {
+    private ArrayList<User> users;
+    private ArrayList<String> messageList;
     private ServerSocket serverSocket;
 
     public Server() throws IOException {
-        userList = new ArrayList<>();
+        users = new ArrayList<>();
         messageList = new ArrayList<>();
-        socketList = new ArrayList<>();
-        timer = new Timer();
     }
 
 
     @Override
     public void run() {
         try {
-            serverSocket = new ServerSocket(32003);
+            serverSocket = new ServerSocket(60000);
             System.out.println("Server started, waiting for clients");
 
-            while (true){
+            while (true) {
                 Socket clientSocket = serverSocket.accept();
-                User user = new User(clientSocket, new PrintWriter(clientSocket.getOutputStream()));
-                userList.add(user);
+                User user = new User(clientSocket, new PrintWriter(clientSocket.getOutputStream(), true), this);
                 Thread userListener = new Thread(user);
                 userListener.start();
-                System.out.println("User connected");
             }
 
 
@@ -46,4 +40,41 @@ public class Server implements Runnable{
         }
 
     }
+
+    public void broadcast(String message) {
+        messageList.add(message);
+        System.out.println(message);
+
+        for (User user : users) {
+            user.getMessage(message);
+        }
+    }
+
+    public void addUser(User user){
+        boolean result = true;
+
+        for (User listUser : users) {
+            if (user.getUser().equals(user.getUser())){
+                result = false;
+                System.out.println("User already exists");
+            }
+        }
+        if (result){
+            users.add(user);
+            broadcast("User: "+user.getUser()+" joined the chat");
+            user.getMessage("J_OK");
+        }else{
+            user.getMessage("J_ERR");
+        }
+    }
+
+    public void removeUser(User user){
+        for (User listUser : users) {
+            if (listUser.getUser().equals(user.getUser())){
+                users.remove(listUser);
+                broadcast("SERVER: User "+user.getUser()+" disconnected");
+            }
+        }
+    }
+
 }

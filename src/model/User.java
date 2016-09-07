@@ -1,5 +1,8 @@
 package model;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,36 +14,40 @@ import java.net.Socket;
  */
 public class User implements Runnable {
     private String user;
-    private BufferedReader reader;
     private Socket socket;
     private PrintWriter pw;
-    private BufferedReader br;
+    private BufferedReader fromUser;
+    private Server server;
+    private Timer timer;
 
-    public User(Socket socket, PrintWriter pw) {
+    public User(Socket socket, PrintWriter pw, Server server) {
+        this.server = server;
         this.socket = socket;
         this.pw = pw;
         try {
             InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
-            br = new BufferedReader(isReader);
+            fromUser = new BufferedReader(isReader);
         } catch (IOException e) {
             System.out.println("an unexpected error occured");
         }
+        timer = new Timer(60000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                disconnect();
+            }
+        });
     }
 
     public String getUser() {
-        return user;
+        String result = "User not found";
+        if (user != null){
+            result = user;
+        }
+        return result;
     }
 
     public void setUser(String user) {
         this.user = user;
-    }
-
-    public BufferedReader getReader() {
-        return reader;
-    }
-
-    public void setReader(BufferedReader reader) {
-        this.reader = reader;
     }
 
     public Socket getSocket() {
@@ -62,18 +69,55 @@ public class User implements Runnable {
     @Override
     public void run() {
         String message;
-        String connect = "Connect";
-        String disconnect = "Disconnect";
-        String chat = "Chat";
-
-        String[] data;
 
         try{
-            while ((message = reader.readLine()) != null){
-                System.out.println("Message");
+            while ((message = fromUser.readLine()) != null){
+                if (message.startsWith("JOIN")){
+                    createUser(message.substring(5));
+                }
+                if (message.startsWith("DATA")){
+                    sendMessage(message.substring(5));
+                }
+                if (message.startsWith("ALVE")){
+                    stillAlive();
+                }
+                if (message.startsWith("QUIT")){
+                    disconnect();
+                }
+
+
             }
         }catch (Exception ex){
 
+        }
+    }
+
+    public void createUser(String message){
+        String[] data = message.split(",");
+        setUser(data[0]);
+        server.addUser(this);
+        timer.start();
+    }
+
+    public void sendMessage(String message){
+        server.broadcast(message);
+    }
+
+    public void getMessage(String message){
+        pw.println(message);
+    }
+
+    public void stillAlive(){
+        timer.restart();
+    }
+
+    public void disconnect(){
+        server.removeUser(this);
+        timer.stop();
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
