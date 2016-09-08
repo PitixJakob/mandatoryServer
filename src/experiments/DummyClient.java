@@ -28,8 +28,6 @@ public class DummyClient {
             Thread readerThread = new Thread(ir);
             readerThread.start();
 
-            out.println("JOIN Jakob, 123:123");
-
             interaction(out);
         }catch (Exception ex){
             ex.printStackTrace();
