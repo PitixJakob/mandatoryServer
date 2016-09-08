@@ -28,7 +28,7 @@ public class DummyClient {
             Thread readerThread = new Thread(ir);
             readerThread.start();
 
-            interaction(out);
+
         }catch (Exception ex){
             ex.printStackTrace();
         }

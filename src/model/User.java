@@ -30,7 +30,7 @@ public class User implements Runnable {
         } catch (IOException e) {
             System.out.println("an unexpected error occured");
         }
-        timer = new Timer(60000, new ActionListener() {
+        timer = new Timer(70000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 disconnect();
@@ -76,7 +76,7 @@ public class User implements Runnable {
                     createUser(message.substring(5));
                 }
                 if (message.startsWith("DATA")) {
-                    sendMessage(message.substring(5));
+                    sendMessage(message);
                 }
                 if (message.startsWith("ALVE")) {
                     stillAlive();
