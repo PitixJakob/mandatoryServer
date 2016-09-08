@@ -15,15 +15,15 @@ import java.net.Socket;
 public class User implements Runnable {
     private String user;
     private Socket socket;
-    private PrintWriter pw;
+    private PrintWriter toUser;
     private BufferedReader fromUser;
     private Server server;
     private Timer timer;
 
-    public User(Socket socket, PrintWriter pw, Server server) {
+    public User(Socket socket, PrintWriter toUser, Server server) {
         this.server = server;
         this.socket = socket;
-        this.pw = pw;
+        this.toUser = toUser;
         try {
             InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
             fromUser = new BufferedReader(isReader);
@@ -58,12 +58,12 @@ public class User implements Runnable {
         this.socket = socket;
     }
 
-    public PrintWriter getPw() {
-        return pw;
+    public PrintWriter getToUser() {
+        return toUser;
     }
 
-    public void setPw(PrintWriter pw) {
-        this.pw = pw;
+    public void setToUser(PrintWriter toUser) {
+        this.toUser = toUser;
     }
 
     @Override
@@ -84,11 +84,8 @@ public class User implements Runnable {
                 if (message.startsWith("QUIT")) {
                     disconnect();
                 }
-
-
             }
-        } catch (Exception ex) {
-
+        } catch (IOException e) {
         }
     }
 
@@ -110,7 +107,7 @@ public class User implements Runnable {
     }
 
     public void getMessage(String message) {
-        pw.println(message);
+        toUser.println(message);
     }
 
     public void stillAlive() {
@@ -118,12 +115,15 @@ public class User implements Runnable {
     }
 
     public void disconnect() {
-        server.removeUser(this);
-        timer.stop();
+        toUser.println("Disconnected from server");
+        toUser.close();
         try {
+            fromUser.close();
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        server.removeUser(this);
+        timer.stop();
     }
 }
