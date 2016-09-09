@@ -8,6 +8,7 @@ package experiments.gui;
 import experiments.Client;
 
 import javax.swing.*;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -34,6 +35,13 @@ public class DummyClientGui extends javax.swing.JFrame {
         chatArea.append(message+"\n");
     }
 
+    public void updateListedUsers(String[] users){
+        userList.setText("");
+        for (String username :
+                users) {
+            userList.append(username+"\n");
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -47,7 +55,7 @@ public class DummyClientGui extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         chatArea = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
-        userList = new javax.swing.JList<>();
+        userList = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         textArea = new javax.swing.JTextArea();
@@ -175,11 +183,19 @@ public class DummyClientGui extends javax.swing.JFrame {
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
-        // TODO add your handling code here:
+        if (textArea.getText().length() <= 250){
+            client.sendChatLine(textArea.getText());
+            textArea.setText("");
+        }else{
+            JOptionPane.showMessageDialog(this, "Max message length is 250 characters");
+        }
+
     }//GEN-LAST:event_sendButtonActionPerformed
 
     private void textAreaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textAreaKeyReleased
-        // TODO add your handling code here:
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER){
+            sendButtonActionPerformed(null);
+        }
     }//GEN-LAST:event_textAreaKeyReleased
 
     /**
@@ -225,7 +241,7 @@ public class DummyClientGui extends javax.swing.JFrame {
     private javax.swing.JTextField portField;
     private javax.swing.JButton sendButton;
     private javax.swing.JTextArea textArea;
-    private javax.swing.JList<String> userList;
+    private javax.swing.JTextArea userList;
     private javax.swing.JTextField usernameField;
     // End of variables declaration//GEN-END:variables
 }

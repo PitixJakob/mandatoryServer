@@ -2,10 +2,14 @@ package experiments;
 
 import experiments.gui.DummyClientGui;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.net.Socket;
 
 /**
@@ -15,6 +19,7 @@ public class Client{
     private String hostname;
     private int port;
     private String username;
+    private Timer timer;
 
     private Socket socket;
     private PrintWriter toServer;
@@ -33,6 +38,14 @@ public class Client{
         socket = new Socket(hostname, port);
         toServer = new PrintWriter(socket.getOutputStream(), true);
         fromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.username = username;
+
+        timer = new Timer(60000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMessage("ALVE");
+            }
+        });
 
         IncomingReader ir = new IncomingReader(this);
         Thread readerThread = new Thread(ir);
@@ -78,5 +91,19 @@ public class Client{
 
     public void getMessage(String message){
         dcg.getMessage(message);
+    }
+
+    public void joinOK(){
+        timer.start();
+        dcg.getMessage("Connected to server "+hostname+":"+port);
+    }
+
+    public void sendChatLine(String message){
+        String result = "DATA "+username+": "+message;
+        sendMessage(result);
+    }
+
+    public void updateListedUsers(String[] users){
+        dcg.updateListedUsers(users);
     }
 }

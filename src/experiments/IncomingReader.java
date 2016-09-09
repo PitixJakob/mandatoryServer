@@ -30,6 +30,10 @@ public class IncomingReader implements Runnable{
                 if (message.startsWith("DATA ")){
                     client.getMessage(message.substring(5));
                 }
+                if (message.startsWith("LIST ")){
+                    String[] result = message.substring(5).split(" ");
+                    client.updateListedUsers(result);
+                }
 
             }
         }catch (Exception ex){
