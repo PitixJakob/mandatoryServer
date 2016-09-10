@@ -37,8 +37,7 @@ public class DummyClientGui extends javax.swing.JFrame {
 
     public void updateListedUsers(String[] users){
         userList.setText("");
-        for (String username :
-                users) {
+        for (String username : users) {
             userList.append(username+"\n");
         }
     }
@@ -175,7 +174,6 @@ public class DummyClientGui extends javax.swing.JFrame {
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
         try {
-            System.out.println("Hallo");
             client.connect(ipField.getText(), Integer.parseInt(portField.getText()), usernameField.getText());
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, e);

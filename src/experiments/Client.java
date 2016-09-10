@@ -39,6 +39,8 @@ public class Client{
         toServer = new PrintWriter(socket.getOutputStream(), true);
         fromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.username = username;
+        this.hostname = hostname;
+        this.port = port;
 
         timer = new Timer(60000, new ActionListener() {
             @Override

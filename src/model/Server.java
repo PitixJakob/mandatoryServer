@@ -56,7 +56,7 @@ public class Server implements Runnable {
         }
         if (result){
             users.add(user);
-            broadcast("User: "+user.getUser()+" joined the chat");
+            broadcast("DATA User: "+user.getUser()+" joined the chat");
             user.getMessage("J_OK");
             updateList();
             return true;
@@ -74,7 +74,7 @@ public class Server implements Runnable {
             }
         }
         if (userToBeRemoved != null){
-            broadcast("User: "+userToBeRemoved.getUser()+" disconnected");
+            broadcast("DATA User: "+userToBeRemoved.getUser()+" disconnected");
             users.remove(userToBeRemoved);
             updateList();
         }

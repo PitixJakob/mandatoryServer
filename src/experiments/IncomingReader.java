@@ -34,6 +34,9 @@ public class IncomingReader implements Runnable{
                     String[] result = message.substring(5).split(" ");
                     client.updateListedUsers(result);
                 }
+                if (message.startsWith("J_OK")){
+                    client.joinOK();
+                }
 
             }
         }catch (Exception ex){
