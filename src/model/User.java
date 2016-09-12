@@ -111,7 +111,7 @@ public class User implements Runnable {
     }
 
     /**
-     * Run method used to receive messages via the BufferedReader fromUser
+     * Run method from Runnable used to receive messages via the BufferedReader fromUser
      */
     @Override
     public void run() {
