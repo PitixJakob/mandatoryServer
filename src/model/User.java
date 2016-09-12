@@ -1,8 +1,6 @@
 package model;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,65 +11,116 @@ import java.net.Socket;
  * Created by jakob on 07-09-16.
  */
 public class User implements Runnable {
-    private String user;
+    private String username;
     private Socket socket;
     private PrintWriter toUser;
     private BufferedReader fromUser;
     private Server server;
     private Timer timer;
 
-    public User(Socket socket, PrintWriter toUser, Server server) {
+    /**
+     * Initial connection setup
+     *
+     * @param socket
+     * @param server
+     */
+    public User(Socket socket, Server server) {
         this.server = server;
         this.socket = socket;
-        this.toUser = toUser;
         try {
+            toUser = new PrintWriter(socket.getOutputStream());
             InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
             fromUser = new BufferedReader(isReader);
         } catch (IOException e) {
             System.out.println("an unexpected error occured");
         }
-        timer = new Timer(70000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                disconnect();
+        timer = new Timer(70000, e -> disconnect());
+    }
+
+    /**
+     * Creates username if the the username is not already on the username list.
+     *
+     * @param message
+     */
+    public void createUser(String message) {
+        String[] data = message.split(",");
+        setUsername(data[0]);
+        if (server.addUser(this)) {
+            timer.start();
+        } else {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        });
-    }
-
-    public String getUser() {
-        String result = "User not found";
-        if (user != null) {
-            result = user;
         }
-        return result;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    /**
+     * Broadcasts a message to all users
+     * @param message
+     */
+    public void sendMessage(String message) {
+        server.broadcast(message);
     }
 
-    public Socket getSocket() {
-        return socket;
+    /**
+     * Sends a message from the server to the this user
+     * @param message
+     */
+    public void receiveMessage(String message) {
+        toUser.println(message);
     }
 
-    public void setSocket(Socket socket) {
-        this.socket = socket;
+    /**
+     * Resets timer
+     */
+    public void stillAlive() {
+        timer.restart();
     }
 
-    public PrintWriter getToUser() {
-        return toUser;
+    /**
+     * Disconnects this user from the server
+     */
+    public void disconnect() {
+        toUser.println("Disconnected from server");
+        if (toUser != null) {
+            toUser.close();
+        }
+        try {
+            if (fromUser != null) {
+                fromUser.close();
+            }
+            if (socket.isConnected()) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            System.out.println("An unexpected error occured while trying to disconnect username: ");
+            e.printStackTrace();
+        }
+        server.removeUser(this);
+        timer.stop();
     }
 
-    public void setToUser(PrintWriter toUser) {
-        this.toUser = toUser;
+    public String getUsername() {
+        return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * Run method from Runnable used to receive messages via the BufferedReader fromUser
+     */
     @Override
     public void run() {
         String message;
 
         try {
+            // While loop for receiving messages from this user
             while ((message = fromUser.readLine()) != null) {
+                //Receiving different messages and check for the protocol
                 if (message.startsWith("JOIN")) {
                     createUser(message.substring(5));
                 }
@@ -86,44 +135,10 @@ public class User implements Runnable {
                 }
             }
         } catch (IOException e) {
-        }
-    }
-
-    public void createUser(String message) {
-        String[] data = message.split(",");
-        setUser(data[0]);
-        timer.start();
-        if (!server.addUser(this)) {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void sendMessage(String message) {
-        server.broadcast(message);
-    }
-
-    public void getMessage(String message) {
-        toUser.println(message);
-    }
-
-    public void stillAlive() {
-        timer.restart();
-    }
-
-    public void disconnect() {
-        toUser.println("Disconnected from server");
-        toUser.close();
-        try {
-            fromUser.close();
-            socket.close();
-        } catch (IOException e) {
+            System.out.println("An unexpected error occured while receiving messages from username: "+ username);
             e.printStackTrace();
         }
-        server.removeUser(this);
-        timer.stop();
     }
+
+
 }

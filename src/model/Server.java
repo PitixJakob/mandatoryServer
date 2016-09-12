@@ -1,7 +1,6 @@
 package model;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -12,81 +11,102 @@ import java.util.ArrayList;
 public class Server implements Runnable {
     private ArrayList<User> users;
     private ServerSocket serverSocket;
+    private int port;
 
-    public Server() throws IOException {
+    /**
+     * Initial server setup
+     * @throws IOException
+     */
+    public Server(int port) {
         users = new ArrayList<>();
+        this.port = port;
     }
 
-
-    @Override
-    public void run() {
-        try {
-            serverSocket = new ServerSocket(60000);
-            System.out.println("Server started, waiting for clients");
-
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                User user = new User(clientSocket, new PrintWriter(clientSocket.getOutputStream(), true), this);
-                Thread userListener = new Thread(user);
-                userListener.start();
-            }
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
+    /**
+     * Sends a message to all user
+     * @param message
+     */
     public void broadcast(String message) {
         System.out.println(message);
 
         for (User user : users) {
-            user.getMessage(message);
+            user.receiveMessage(message);
         }
     }
 
+    /**
+     * Checks if User is already on the list, if so, returns false, if not, returns true and adds the user to the list
+     * @param user
+     * @return if successful, returns true
+     */
     public boolean addUser(User user){
         boolean result = true;
 
+        //Checks if user is already on the list
         for (User listUser : users) {
-            if (user.getUser().equals(listUser.getUser())){
+            if (user.getUsername().equals(listUser.getUsername())){
                 result = false;
             }
         }
+
+        //If user is not on the list, adds user to the users list and sends "J_OK" to user
         if (result){
             users.add(user);
-            broadcast("DATA User: "+user.getUser()+" joined the chat");
-            user.getMessage("J_OK");
+            broadcast("DATA User: "+user.getUsername()+" joined the chat");
+            user.receiveMessage("J_OK");
             updateList();
             return true;
-        }else{
-            user.getMessage("J_ERR");
+        }else{ // If user is on the list, server responds with "J_ERR"
+            user.receiveMessage("J_ERR");
             return false;
         }
     }
 
+    /**
+     * removes a user from the list of connected users
+     * @param user
+     */
     public void removeUser(User user){
         User userToBeRemoved = null;
         for (User listUser : users) {
-            if (listUser.getUser().equals(user.getUser())){
+            if (listUser.getUsername().equals(user.getUsername())){
                 userToBeRemoved = listUser;
             }
         }
         if (userToBeRemoved != null){
-            broadcast("DATA User: "+userToBeRemoved.getUser()+" disconnected");
+            broadcast("DATA User: "+userToBeRemoved.getUsername()+" disconnected");
             users.remove(userToBeRemoved);
             updateList();
         }
     }
 
+    /**
+     * Updates connected users list and broadcasts the update
+     */
     public void updateList(){
         String list = "LIST";
         for (User user : users) {
-            list += " "+user.getUser();
+            list += " "+user.getUsername();
         }
-
         broadcast(list);
     }
+
+    @Override
+    public void run() {
+        try {
+            serverSocket = new ServerSocket(port);
+            System.out.println("Server started, listening on port: "+port);
+
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                User user = new User(clientSocket, this);
+                Thread userListener = new Thread(user);
+                userListener.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }
