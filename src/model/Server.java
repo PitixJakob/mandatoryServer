@@ -11,13 +11,15 @@ import java.util.ArrayList;
 public class Server implements Runnable {
     private ArrayList<User> users;
     private ServerSocket serverSocket;
+    private int port;
 
     /**
      * Initial server setup
      * @throws IOException
      */
-    public Server() {
+    public Server(int port) {
         users = new ArrayList<>();
+        this.port = port;
     }
 
     /**
@@ -92,8 +94,8 @@ public class Server implements Runnable {
     @Override
     public void run() {
         try {
-            serverSocket = new ServerSocket(60000);
-            System.out.println("Server started, waiting for clients");
+            serverSocket = new ServerSocket(port);
+            System.out.println("Server started, listening on port: "+port);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
