@@ -1,7 +1,6 @@
 package model;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ public class Server implements Runnable {
         users = new ArrayList<>();
     }
 
-
     @Override
     public void run() {
         try {
@@ -26,23 +24,20 @@ public class Server implements Runnable {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                User user = new User(clientSocket, new PrintWriter(clientSocket.getOutputStream(), true), this);
+                User user = new User(clientSocket, this);
                 Thread userListener = new Thread(user);
                 userListener.start();
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public void broadcast(String message) {
         System.out.println(message);
 
         for (User user : users) {
-            user.getMessage(message);
+            user.receiveMessage(message);
         }
     }
 
@@ -50,18 +45,18 @@ public class Server implements Runnable {
         boolean result = true;
 
         for (User listUser : users) {
-            if (user.getUser().equals(listUser.getUser())){
+            if (user.getUsername().equals(listUser.getUsername())){
                 result = false;
             }
         }
         if (result){
             users.add(user);
-            broadcast("DATA User: "+user.getUser()+" joined the chat");
-            user.getMessage("J_OK");
+            broadcast("DATA User: "+user.getUsername()+" joined the chat");
+            user.receiveMessage("J_OK");
             updateList();
             return true;
         }else{
-            user.getMessage("J_ERR");
+            user.receiveMessage("J_ERR");
             return false;
         }
     }
@@ -69,12 +64,12 @@ public class Server implements Runnable {
     public void removeUser(User user){
         User userToBeRemoved = null;
         for (User listUser : users) {
-            if (listUser.getUser().equals(user.getUser())){
+            if (listUser.getUsername().equals(user.getUsername())){
                 userToBeRemoved = listUser;
             }
         }
         if (userToBeRemoved != null){
-            broadcast("DATA User: "+userToBeRemoved.getUser()+" disconnected");
+            broadcast("DATA User: "+userToBeRemoved.getUsername()+" disconnected");
             users.remove(userToBeRemoved);
             updateList();
         }
@@ -83,9 +78,8 @@ public class Server implements Runnable {
     public void updateList(){
         String list = "LIST";
         for (User user : users) {
-            list += " "+user.getUser();
+            list += " "+user.getUsername();
         }
-
         broadcast(list);
     }
 
