@@ -28,7 +28,6 @@ public class Server implements Runnable {
      */
     public void broadcast(String message) {
         System.out.println(message);
-
         for (User user : users) {
             user.receiveMessage(message);
         }
@@ -52,7 +51,7 @@ public class Server implements Runnable {
         //If user is not on the list, adds user to the users list and sends "J_OK" to user
         if (result){
             users.add(user);
-            broadcast("DATA User: "+user.getUsername()+" joined the chat");
+            broadcast("DATA "+user.getUsername()+" joined the chat");
             user.receiveMessage("J_OK");
             updateList();
             return true;

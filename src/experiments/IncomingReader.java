@@ -24,6 +24,7 @@ public class IncomingReader implements Runnable{
 
         try{
             while ((message = fromServer.readLine()) != null){
+                System.out.println(message);
                 if (message.startsWith("J_ERR")){
                     client.sendError("Username is already taken");
                 }
