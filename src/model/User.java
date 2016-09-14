@@ -28,7 +28,7 @@ public class User implements Runnable {
         this.server = server;
         this.socket = socket;
         try {
-            toUser = new PrintWriter(socket.getOutputStream());
+            toUser = new PrintWriter(socket.getOutputStream(), true);
             InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
             fromUser = new BufferedReader(isReader);
         } catch (IOException e) {
@@ -95,8 +95,7 @@ public class User implements Runnable {
                 socket.close();
             }
         } catch (IOException e) {
-            System.out.println("An unexpected error occured while trying to disconnect username: ");
-            e.printStackTrace();
+            //Exception occurs when user disconnects and therefor is ignored.
         }
         server.removeUser(this);
         timer.stop();
