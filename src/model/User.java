@@ -95,7 +95,8 @@ public class User implements Runnable {
                 socket.close();
             }
         } catch (IOException e) {
-            //Exception occurs when user disconnects and therefor is ignored.
+            System.out.println("An unexpected error occured while receiving messages from username: "+ username);
+            e.printStackTrace();
         }
         server.removeUser(this);
         timer.stop();
@@ -134,8 +135,7 @@ public class User implements Runnable {
                 }
             }
         } catch (IOException e) {
-            System.out.println("An unexpected error occured while receiving messages from username: "+ username);
-            e.printStackTrace();
+            //Only occurs when user disconnects, which is fine.
         }
     }
 
