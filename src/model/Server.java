@@ -41,6 +41,18 @@ public class Server implements Runnable {
     public boolean addUser(User user){
         boolean result = true;
 
+        //Checks if username is over 12 characters long
+        if (user.getUsername().length() > 12){
+            result = false;
+        }
+
+        //Checks if username contains invalid characters
+        for (String character: user.getUsername().split("")){
+            if (character.matches("[^a-zA-Z0-9_-]")){
+                result = false;
+            }
+        }
+
         //Checks if user is already on the list
         for (User listUser : users) {
             if (user.getUsername().equals(listUser.getUsername())){

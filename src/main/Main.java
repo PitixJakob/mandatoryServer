@@ -17,11 +17,11 @@ public class Main {
      * @return
      */
     public static int queryForPort() {
-        System.out.println("Please enter a port number (Press enter to use default port 60000)");
+        System.out.println("Please enter a port number (Press enter to use default port 1254)");
 
         Scanner scanner = new Scanner(System.in);
         String scanInput = scanner.nextLine();
-        int result = 60000;
+        int result = 1254;
         if (!scanInput.isEmpty()) {
             try {
                 result = Integer.parseInt(scanInput);
