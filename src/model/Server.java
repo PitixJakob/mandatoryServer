@@ -29,7 +29,7 @@ public class Server implements Runnable {
     public void broadcast(String message) {
         System.out.println(message);
         for (User user : users) {
-            user.receiveMessage(message);
+            user.sendMessageToUser(message);
         }
     }
 
@@ -64,11 +64,11 @@ public class Server implements Runnable {
         if (result){
             users.add(user);
             broadcast("DATA "+user.getUsername()+" joined the chat");
-            user.receiveMessage("J_OK");
+            user.sendMessageToUser("J_OK");
             updateList();
             return true;
         }else{ // If user is on the list, server responds with "J_ERR"
-            user.receiveMessage("J_ERR");
+            user.sendMessageToUser("J_ERR");
             return false;
         }
     }

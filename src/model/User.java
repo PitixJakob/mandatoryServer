@@ -13,8 +13,8 @@ import java.net.Socket;
 public class User implements Runnable {
     private String username;
     private Socket socket;
-    private PrintWriter toUser;
-    private BufferedReader fromUser;
+    private PrintWriter out;
+    private BufferedReader in;
     private Server server;
     private Timer timer;
 
@@ -28,9 +28,9 @@ public class User implements Runnable {
         this.server = server;
         this.socket = socket;
         try {
-            toUser = new PrintWriter(socket.getOutputStream(), true);
+            out = new PrintWriter(socket.getOutputStream(), true);
             InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
-            fromUser = new BufferedReader(isReader);
+            in = new BufferedReader(isReader);
         } catch (IOException e) {
             System.out.println("an unexpected error occured");
         }
@@ -60,43 +60,37 @@ public class User implements Runnable {
      * Broadcasts a message to all users
      * @param message
      */
-    public void sendMessage(String message) {
-        server.broadcast(message);
+    public void receiveMessageFromUser(String message) {
+        if (message.length() <= 255) {
+            server.broadcast(message);
+        }
     }
 
     /**
      * Sends a message from the server to the this user
      * @param message
      */
-    public void receiveMessage(String message) {
-        toUser.println(message);
-    }
-
-    /**
-     * Resets timer
-     */
-    public void stillAlive() {
-        timer.restart();
+    public void sendMessageToUser(String message) {
+        out.println(message);
     }
 
     /**
      * Disconnects this user from the server
      */
     public void disconnect() {
-        toUser.println("Disconnected from server");
-        if (toUser != null) {
-            toUser.close();
+        out.println("Disconnected from server");
+        if (out != null) {
+            out.close();
         }
         try {
-            if (fromUser != null) {
-                fromUser.close();
+            if (in != null) {
+                in.close();
             }
             if (socket.isConnected()) {
                 socket.close();
             }
         } catch (IOException e) {
-            System.out.println("An unexpected error occured while receiving messages from username: "+ username);
-            e.printStackTrace();
+            //TRYING TO DISCONNECT ANYWAYS
         }
         server.removeUser(this);
         timer.stop();
@@ -111,7 +105,7 @@ public class User implements Runnable {
     }
 
     /**
-     * Run method from Runnable used to receive messages via the BufferedReader fromUser
+     * Run method from Runnable used to receive messages via the BufferedReader in
      */
     @Override
     public void run() {
@@ -119,16 +113,16 @@ public class User implements Runnable {
 
         try {
             // While loop for receiving messages from this user
-            while ((message = fromUser.readLine()) != null) {
+            while ((message = in.readLine()) != null) {
                 //Receiving different messages and check for the protocol
                 if (message.startsWith("JOIN")) {
                     createUser(message.substring(5));
                 }
                 if (message.startsWith("DATA")) {
-                    sendMessage(message);
+                    receiveMessageFromUser(message);
                 }
                 if (message.startsWith("ALVE")) {
-                    stillAlive();
+                    timer.restart();
                 }
                 if (message.startsWith("QUIT")) {
                     disconnect();
