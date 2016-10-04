@@ -51,7 +51,8 @@ public class Server implements Runnable {
             if (character.matches("[^a-zA-Z0-9_-]")){
                 result = false;
             }
-        }
+
+         }
 
         //Checks if user is already on the list
         for (User listUser : users) {
