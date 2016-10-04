@@ -48,7 +48,7 @@ public class Server implements Runnable {
 
         //Checks if username contains invalid characters
         for (String character: user.getUsername().split("")){
-            if (character.matches("[^a-zA-Z0-9_-]")){
+            if (character.matches("[^a-zA-Z0-9ÆØÅæøå_-]")){
                 result = false;
             }
 

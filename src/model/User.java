@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 
 /**
  * Created by jakob on 07-09-16.
@@ -29,8 +30,7 @@ public class User implements Runnable {
         this.socket = socket;
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
-            InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
-            in = new BufferedReader(isReader);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream(), Charset.forName("UTF-8")));
         } catch (IOException e) {
             System.out.println("an unexpected error occured");
         }
@@ -60,7 +60,7 @@ public class User implements Runnable {
      * Broadcasts a message to all users
      * @param message
      */
-    public void receiveMessageFromUser(String message) {
+    public void broadcastMessageFromUser(String message) {
         if (message.length() <= 255) {
             server.broadcast(message);
         }
@@ -78,11 +78,10 @@ public class User implements Runnable {
      * Disconnects this user from the server
      */
     public void disconnect() {
-        out.println("Disconnected from server");
-        if (out != null) {
-            out.close();
-        }
         try {
+            if (out != null) {
+                out.close();
+            }
             if (in != null) {
                 in.close();
             }
@@ -119,7 +118,7 @@ public class User implements Runnable {
                     createUser(message.substring(5));
                 }
                 if (message.startsWith("DATA")) {
-                    receiveMessageFromUser(message);
+                    broadcastMessageFromUser(message);
                 }
                 if (message.startsWith("ALVE")) {
                     System.out.println("RECEIVED ALVE FROM USER: "+username);
