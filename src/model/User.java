@@ -122,9 +122,11 @@ public class User implements Runnable {
                     receiveMessageFromUser(message);
                 }
                 if (message.startsWith("ALVE")) {
+                    System.out.println("RECEIVED ALVE FROM USER: "+username);
                     timer.restart();
                 }
                 if (message.startsWith("QUIT")) {
+                    System.out.println("RECEIVED QUIT FROM USER: "+username);
                     disconnect();
                 }
             }
