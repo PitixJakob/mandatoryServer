@@ -61,7 +61,7 @@ public class User implements Runnable {
      * @param message
      */
     public void broadcastMessageFromUser(String message) {
-        if (message.length() <= 255) {
+        if (message.length() <= 255 && server.checkUser(this)) {
             server.broadcast(message);
         }
     }

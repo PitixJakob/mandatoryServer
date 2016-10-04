@@ -51,7 +51,6 @@ public class Server implements Runnable {
             if (character.matches("[^a-zA-Z0-9ÆØÅæøå_-]")){
                 result = false;
             }
-
          }
 
         //Checks if user is already on the list
@@ -118,6 +117,18 @@ public class Server implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean checkUser(User user){
+        boolean result = false;
+        if (user.getUsername() != null) {
+            for (User listUser : users) {
+                if (listUser.getUsername().equals(user.getUsername())) {
+                    result = true;
+                }
+            }
+        }
+        return result;
     }
 
 
