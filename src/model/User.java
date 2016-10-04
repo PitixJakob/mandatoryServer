@@ -114,10 +114,10 @@ public class User implements Runnable {
             // While loop for receiving messages from this user
             while ((message = in.readLine()) != null) {
                 //Receiving different messages and check for the protocol
-                if (message.startsWith("JOIN")) {
+                if (message.startsWith("JOIN ")) {
                     createUser(message.substring(5));
                 }
-                if (message.startsWith("DATA")) {
+                if (message.startsWith("DATA ")) {
                     broadcastMessageFromUser(message);
                 }
                 if (message.startsWith("ALVE")) {
@@ -128,6 +128,7 @@ public class User implements Runnable {
                     System.out.println("RECEIVED QUIT FROM USER: "+username);
                     disconnect();
                 }
+
             }
         } catch (IOException e) {
             //Only occurs when user disconnects, which is fine.
