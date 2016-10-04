@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="mandatoryServer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/mandatoryServer_jar</output-path>
+    <root id="archive" name="mandatoryServer.jar">
+      <element id="module-output" name="mandatoryServer" />
+    </root>
+  </artifact>
+</component>
