@@ -26,7 +26,7 @@ public class Server implements Runnable {
      * Sends a message to all user
      * @param message
      */
-    public void broadcast(String message) {
+    public synchronized void broadcast(String message) {
         System.out.println(message);
         for (User user : users) {
             user.sendMessageToUser(message);
@@ -38,7 +38,7 @@ public class Server implements Runnable {
      * @param user
      * @return if successful, returns true
      */
-    public boolean addUser(User user){
+    public boolean addUser(User user, String host){
         boolean result = true;
 
         //Checks if username is over 12 characters long
@@ -62,13 +62,14 @@ public class Server implements Runnable {
 
         //If user is not on the list, adds user to the users list and sends "J_OK" to user
         if (result){
+            user.sendMessageToUser("J_OK");
             users.add(user);
             broadcast("DATA "+user.getUsername()+" joined the chat");
-            user.sendMessageToUser("J_OK");
             updateList();
             return true;
         }else{ // If user is on the list, server responds with "J_ERR"
             user.sendMessageToUser("J_ERR");
+            System.out.println("Received erroneous request from:"+host);
             return false;
         }
     }
