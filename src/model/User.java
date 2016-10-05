@@ -45,7 +45,7 @@ public class User implements Runnable {
     public void createUser(String message) {
         String[] data = message.split(",");
         setUsername(data[0]);
-        if (server.addUser(this, data[1])) {
+        if (server.addUser(this)) {
             timer.start();
         } else {
             try {
